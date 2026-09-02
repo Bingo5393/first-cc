@@ -1,0 +1,14 @@
+{
+  "name": "pomodoro",
+  "version": "1.0.0",
+  "description": "番茄钟桌面应用",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^44.1.1"
+  }
+}

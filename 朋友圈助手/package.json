@@ -1,7 +1,7 @@
 {
-  "name": "pomodoro",
-  "version": "1.0.0",
-  "description": "番茄钟桌面应用",
+  "name": "moments-assistant",
+  "version": "0.1.0",
+  "description": "微信朋友圈发布助手 —— 文案库 + 模板 + 一键复制",
   "main": "main.js",
   "scripts": {
     "start": "electron ."

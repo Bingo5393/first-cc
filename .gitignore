@@ -11,3 +11,8 @@ Thumbs.db
 # Python 缓存
 __pycache__/
 *.pyc
+
+# 朋友圈转发助手：运行时产物
+logs/
+data/media/
+data/forwarded.db

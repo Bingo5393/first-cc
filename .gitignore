@@ -14,5 +14,5 @@ __pycache__/
 
 # 朋友圈转发助手：运行时产物
 logs/
-data/media/
-data/forwarded.db
+**/data/media/
+**/data/forwarded.db

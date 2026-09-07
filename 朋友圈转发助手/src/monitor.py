@@ -22,6 +22,13 @@ def fetch_new_moments(client, config):
         logger.warning('配置未设置监控目标（monitor.targets），跳过本次拉取')
         return []
 
+    # 把配置里的别名（备注名/昵称/wxid）解析为 wxid 集合，方便匹配消息 sender
+    target_wxids = set(client.resolve_targets(targets))
+    blacklist_wxids = set(client.resolve_targets(list(blacklist)))
+    if not target_wxids:
+        logger.warning('监控目标解析为空，跳过本次拉取')
+        return []
+
     # 1. 触发刷新朋友圈（让微信推送最新动态）
     client.refresh_moments()
 
@@ -44,9 +51,9 @@ def fetch_new_moments(client, config):
         moment = parser.parse_moment(msg)
 
         # 只处理监控目标，且排除黑名单
-        if moment.user not in targets:
+        if moment.user not in target_wxids:
             continue
-        if moment.user in blacklist:
+        if moment.user in blacklist_wxids:
             logger.debug(f'好友 {moment.user} 在黑名单中，跳过')
             continue
 

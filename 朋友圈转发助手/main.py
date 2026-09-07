@@ -89,7 +89,11 @@ def main():
 
     # 4. 初始化微信客户端（WeChatFerry）
     try:
-        wx = client.WxClient(config['wcf']['host'], config['wcf']['port'])
+        wx = client.WxClient(
+            config['wcf']['host'],
+            config['wcf']['port'],
+            config.get('publish_coords'),  # 发圈坐标，可空（用默认占位值）
+        )
     except Exception as e:
         logger.error(f'初始化 WeChatFerry 客户端失败：{e}')
         logger.error('请确认：1) PC 微信已启动并登录；2) wcf 服务/DLL 已就绪')

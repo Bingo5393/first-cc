@@ -78,9 +78,17 @@ schedule:
   poll_interval_minutes: 10
   time_window_minutes: 60
 wcf:
-  host: "127.0.0.1"
+  host: ""                          # 留空=本地模式（自动注入微信）
   port: 10086
+publish_coords:                     # PC 微信发圈坐标（需实测校准）
+  moments_entry: [66, 122]
+  camera: [906, 56]
+  add_image: [120, 160]
+  text_input: [520, 420]
+  publish_btn: [860, 600]
 ```
+
+> `monitor.targets` 填备注名 / 昵称 / wxid 均可，程序会自动映射到 wxid。
 
 ## 运行
 

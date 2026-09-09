@@ -34,6 +34,9 @@
 │   ├── storage.py     # SQLite 去重存储
 │   ├── logger.py      # 日志配置
 │   └── utils.py       # 配置/路径/哈希工具
+├── tools/
+│   ├── dump_pyq.py       # 调试：dump 朋友圈消息原始字段
+│   └── calibrate_coords.py  # 调试：发圈坐标校准
 ├── data/
 │   ├── media/         # 下载的图片/视频
 │   └── forwarded.db   # 去重数据库（运行后生成）
@@ -50,8 +53,8 @@ pip install -r requirements.txt
 
 2. 部署 WeChatFerry：
 
-   - 从 [WeChatFerry 官方仓库](https://github.com/lich0821/WeChatFerry) 下载对应版本的 `wcf` DLL；
-   - 安装与 wcferry 匹配的 **PC 微信老版本**（本项目锁定 `wcferry==39.6.0.0`，对应微信 `3.9.6.0`，微信需关闭自动更新）；
+   - `pip install wcferry==39.6.0.0` 后自带 `wcf.exe` / `spy.dll` / `sdk.dll`，无需单独下载 DLL；
+   - 安装与 wcferry 匹配的 **PC 微信老版本**（本项目锁定 `wcferry==39.6.0.0`，对应微信 `3.9.12.56`，微信需关闭自动更新，否则升回 4.x 会 hook 失效）；
    - 启动微信并扫码登录营销号，然后启动 wcf 服务。
 
 ## 配置
@@ -77,6 +80,7 @@ time_control:
 schedule:
   poll_interval_minutes: 10
   time_window_minutes: 60
+  pyq_wait_seconds: 3              # refresh 后等待朋友圈消息推送的秒数
 wcf:
   host: ""                          # 留空=本地模式（自动注入微信）
   port: 10086
@@ -96,6 +100,21 @@ publish_coords:                     # PC 微信发圈坐标（需实测校准）
 python main.py                # 默认 config.yaml
 python main.py --config xxx.yaml
 ```
+
+## 调试工具（真机实测用）
+
+在正式跑转发前，建议先用下面两个工具在真机上校准，把结果回填到 `parser.py` 和 `config.yaml`：
+
+```bash
+# 1. dump 朋友圈消息原始字段（校准 type/sender/多图/XML 解析）
+python tools/dump_pyq.py --wait 8
+
+# 2. 校准发圈坐标（生成 publish_coords）
+python tools/calibrate_coords.py
+```
+
+- `dump_pyq.py`：刷新朋友圈后 dump 每条消息的 `type` / `sender` / `content` / `thumb` / `extra` / 完整 `xml`，结果同时写入 `logs/pyq_dump_*.txt`。用这些真实字段精确化 `parser.py` 里的启发式解析（目前 `type`、`sender`、多图 `extra` 分隔规则均为占位实现）。
+- `calibrate_coords.py`：引导你把鼠标移到各点击目标、按 **F8** 记录，输出可直接粘贴的 `publish_coords`（需要先 `pip install pywin32`）。
 
 ## ⚠️ 注意事项
 

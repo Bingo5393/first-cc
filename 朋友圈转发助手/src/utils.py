@@ -16,8 +16,9 @@ DEFAULT_CONFIG = {
     'rate_limit': {'max_per_hour': 5, 'max_per_day': 20,
                    'random_delay_min': 3, 'random_delay_max': 8},
     'time_control': {'enable': False, 'start_hour': 9, 'end_hour': 22},
-    'schedule': {'poll_interval_minutes': 10, 'time_window_minutes': 60},
-    'wcf': {'host': '127.0.0.1', 'port': 10086},
+    'schedule': {'poll_interval_minutes': 10, 'time_window_minutes': 60,
+                 'pyq_wait_seconds': 3},
+    'wcf': {'host': '', 'port': 10086},
     'notify': {'enable': False, 'webhook_url': ''},
 }
 

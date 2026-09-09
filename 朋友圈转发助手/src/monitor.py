@@ -32,8 +32,9 @@ def fetch_new_moments(client, config):
     # 1. 触发刷新朋友圈（让微信推送最新动态）
     client.refresh_moments()
 
-    # 2. 取出积压消息
-    msgs = client.fetch_pending_msgs()
+    # 2. 取出积压消息（refresh 后消息异步推送，等待一段时间再取）
+    wait = config['schedule'].get('pyq_wait_seconds', 3)
+    msgs = client.fetch_pending_msgs(wait_seconds=wait)
     if not msgs:
         logger.info('本次未收到朋友圈消息')
         return []

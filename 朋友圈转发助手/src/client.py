@@ -6,6 +6,7 @@
 #   2. 封装 PC 微信「发朋友圈」的 UI 自动化（因为 WeChatFerry 无发布朋友圈接口）。
 
 import time
+from queue import Empty
 
 from loguru import logger
 
@@ -36,7 +37,11 @@ class WxClient:
         self.coords = coords or DEFAULT_COORDS
         self._contacts = None  # 好友列表缓存（别名映射用）
         # 初始化 WeChatFerry 客户端（本地模式会运行 wcf.exe 注入微信）
-        self.wcf = Wcf(host=self.host, port=port)
+        # block=False：不在构造函数里阻塞等待登录，改由 login_check() 显式检测，
+        # 否则微信未登录时这里会死循环卡住，走不到后面的友好提示。
+        # debug=False：注入 release 版 spy.dll（本项目已 patch 其版本检查以适配兼容层），
+        # 若用 debug=True 会注入 spy_debug.dll，那是另一个未 patch 的文件。
+        self.wcf = Wcf(host=self.host, port=port, block=False, debug=False)
 
     # ---------- 连接 / 登录 ----------
     def login_check(self):
@@ -93,14 +98,31 @@ class WxClient:
         """触发刷新朋友圈，返回状态码（1 成功）。"""
         return self.wcf.refresh_pyq()
 
-    def fetch_pending_msgs(self):
-        """非阻塞地取出当前积压的微信消息（含朋友圈消息）。"""
+    def fetch_pending_msgs(self, wait_seconds=0.0):
+        """取出当前积压的微信消息（含朋友圈消息）。
+
+        wait_seconds > 0：在该时间内阻塞等待消息到达（refresh_pyq 后消息是异步
+        推送的，需要短暂等待才能取到刚刷新的动态）；
+        wait_seconds = 0：只取当前队列里已有的消息，不等待。
+        """
         msgs = []
+        deadline = time.time() + max(wait_seconds, 0.0)
         try:
             while self.wcf.is_receiving_msg():
-                msg = self.wcf.get_msg(block=False)
-                if msg is None:
-                    break
+                if wait_seconds <= 0:
+                    # 非阻塞模式：队列空即结束
+                    try:
+                        msg = self.wcf.get_msg(block=False)
+                    except Empty:
+                        break
+                else:
+                    # 阻塞模式：get_msg 队列空时最多阻塞 1 秒后抛 Empty，继续等到 deadline
+                    if time.time() >= deadline:
+                        break
+                    try:
+                        msg = self.wcf.get_msg(block=True)
+                    except Empty:
+                        continue
                 msgs.append(msg)
         except Exception as e:
             logger.warning(f'读取消息队列异常：{e}')

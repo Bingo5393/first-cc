@@ -1,0 +1,6 @@
+Windows Registry Editor Version 5.00
+
+; 微信 3.9.12.56 32位 兼容性设置（永久生效，绕过"版本过低"）
+; 路径里的双反斜杠是注册表转义，改成你的实际安装路径
+[HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers]
+"C:\\Program Files (x86)\\Tencent\\WeChat\\WeChat.exe"="~ ARM64WOWONAMD64"
